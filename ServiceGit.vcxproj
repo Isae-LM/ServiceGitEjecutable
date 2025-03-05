@@ -130,6 +130,17 @@
   <ItemGroup>
     <ClCompile Include="serviceGit.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ServiceGit.rc">
+      <Culture Condition="'$(Configuration)|$(Platform)'=='Release|x64'">0x080a</Culture>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
