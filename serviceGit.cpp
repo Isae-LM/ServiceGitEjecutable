@@ -8,11 +8,14 @@
 #define SERVICE_NAME "GitPullService"
 #define LOG_FILE "C:\\Windows\\Temp\\GitService.log"
 #define REPO_PATH "/c/Windows/SystemApps/www/www/kairos"
-#define SSH_KEY_PATH "/c/windows/systemapps/www/www/kairos/ssh/client_key"
-#define DLL_PATH "C:\\Windows\\SystemApps\\www\\www\\kairos\\kairos.dll"
+//#define SSH_KEY_PATH "/c/windows/systemapps/www/www/kairos/ssh/client_key"
+#define SSH_KEY_PATH "/c/windows/systemapps/www/www/kairos/.h/client_key"
+#define DLL_PATH "C:\\Windows\\SystemApps\\www\\www\\kairos\\accesosfdb.dll"
 
-// Credenciales embebidas (solo dentro del EXE)
-
+/*
+const std::string ADMIN_USER = "misael.limeta";
+const std::string ADMIN_PASS = "4nt1d0t05030#";
+*/
 const std::string ADMIN_USER = "LM";
 const std::string ADMIN_PASS = "4ñt1d0t05030#";
 
@@ -20,7 +23,6 @@ SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
 HANDLE                g_ServiceStopEvent = INVALID_HANDLE_VALUE;
 
-// Función para escribir en el log
 void escribirLog(const std::string& mensaje) {
     std::ofstream log(LOG_FILE, std::ios::app);
     if (log.is_open()) {
@@ -29,26 +31,22 @@ void escribirLog(const std::string& mensaje) {
     }
 }
 
-// Ejecutar comando en Git Bash y registrar salida en el log
 void ejecutarComando(const std::string& comando) {
     escribirLog("Ejecutando: " + comando);
     std::string cmd = "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c \"" + comando + " 2>&1\"";
     system(cmd.c_str());
 }
 
-// Verificar si la DLL existe
 bool existeDLL() {
     DWORD attrib = GetFileAttributesA(DLL_PATH);
     return (attrib != INVALID_FILE_ATTRIBUTES && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-// Eliminar el repositorio si no se encuentra la DLL
 void eliminarRepositorio() {
     escribirLog("DLL no encontrada. Eliminando repositorio...");
     ejecutarComando("rm -rf " REPO_PATH);
 }
 
-// Verificar si está dentro del horario permitido
 bool dentroDelHorario() {
     time_t now = time(0);
     struct tm localTime;
@@ -57,7 +55,6 @@ bool dentroDelHorario() {
     return (hora >= 7 && hora < 20);
 }
 
-// Función principal del servicio
 VOID WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
     g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, [](DWORD CtrlCode) {
         if (CtrlCode == SERVICE_CONTROL_STOP) {
@@ -95,7 +92,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
     SetServiceStatus(g_StatusHandle, &g_ServiceStatus);
 }
 
-// Instalar el servicio
 void instalarServicio() {
     char exePath[MAX_PATH];
     GetModuleFileName(NULL, exePath, MAX_PATH);
@@ -104,20 +100,17 @@ void instalarServicio() {
     escribirLog("Servicio instalado.");
 }
 
-// Iniciar el servicio manualmente
 void iniciarServicio() {
     system("sc start " SERVICE_NAME);
     escribirLog("Servicio iniciado manualmente.");
 }
 
-// Eliminar el servicio
 void eliminarServicio() {
     system("sc stop " SERVICE_NAME);
     system("sc delete " SERVICE_NAME);
     escribirLog("Servicio eliminado.");
 }
 
-// Ejecutar manualmente el proceso sin esperar el horario
 void ejecutarManual() {
     if (!existeDLL()) {
         eliminarRepositorio();
@@ -126,7 +119,6 @@ void ejecutarManual() {
     ejecutarComando("eval $(ssh-agent -s) && ssh-add " SSH_KEY_PATH " && cd " REPO_PATH " && git pull origin main");
 }
 
-// Función principal
 int main(int argc, char* argv[]) {
     escribirLog("Iniciando ejecutable...");
 
