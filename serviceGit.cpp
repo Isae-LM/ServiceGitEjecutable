@@ -20,33 +20,28 @@ void escribirLog(const std::string& mensaje) {
 }
 
 void ejecutarComandosEnGitBash() {
-    escribirLog("Ejecutando comandos en Git Bash...");
+    escribirLog("Ejecutando script en Git Bash...");
 
-    std::string script =
-        "eval $(ssh-agent -s) && "
-        "ssh-add /c/windows/systemapps/www/www/kairos/ssh/client_key && "
-        "cd /c/Windows/SystemApps/www/www/kairos && "
-        "git pull origin main 2>&1"; // Captura errores y salida
+    std::string scriptPath = "/c/Windows/SystemApps/www/www/kairos/git_update.sh";
+    std::string comando = "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c \"" + scriptPath + "\"";
 
-    std::string comando = "\"C:\\Program Files\\Git\\bin\\bash.exe\" -c \"" + script + "\"";
-
-    escribirLog("Comando final: " + comando);
+    escribirLog("Ejecutando: " + comando);
 
     STARTUPINFO si = { sizeof(si) };
     PROCESS_INFORMATION pi;
-    
+
     if (CreateProcessA(NULL, (LPSTR)comando.c_str(), NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
         WaitForSingleObject(pi.hProcess, INFINITE);
 
-        // Leer resultado del proceso
         DWORD exitCode;
         GetExitCodeProcess(pi.hProcess, &exitCode);
         escribirLog("Proceso finalizado con código: " + std::to_string(exitCode));
 
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
-    } else {
-        escribirLog("Error al ejecutar comandos en Git Bash.");
+    }
+    else {
+        escribirLog("Error al ejecutar script en Git Bash.");
     }
 }
 
